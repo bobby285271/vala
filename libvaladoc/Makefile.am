@@ -119,10 +119,6 @@ libvaladoc_la_VALASOURCES = \
 	content/tablerow.vala \
 	content/taglet.vala \
 	content/text.vala \
-	charts/chart.vala \
-	charts/chartfactory.vala \
-	charts/hierarchychart.vala \
-	charts/simplechartfactory.vala \
 	parser/manyrule.vala \
 	parser/oneofrule.vala \
 	parser/optionalrule.vala \
@@ -149,12 +145,23 @@ libvaladoc_la_VALASOURCES = \
 	highlighter/codetoken.vala \
 	highlighter/highlighter.vala \
 	html/basicdoclet.vala \
-	html/htmlchartfactory.vala \
 	html/linkhelper.vala \
 	html/cssclassresolver.vala \
 	html/htmlmarkupwriter.vala \
 	html/htmlrenderer.vala \
 	$(NULL)
+
+if ENABLE_GRAPHVIZ
+libvaladoc_la_VALASOURCES += \
+	charts/chart.vala \
+	charts/chartfactory.vala \
+	charts/hierarchychart.vala \
+	charts/simplechartfactory.vala \
+	html/htmlchartfactory.vala \
+	$(NULL)
+
+LIBGVC_PKG = --vapidir $(top_srcdir)/vapi --pkg libgvc
+endif
 
 libvaladoc@PACKAGE_SUFFIX@_la_SOURCES = \
 	libvaladoc.vala.stamp \
@@ -174,11 +181,11 @@ libvaladoc.vala.stamp: $(libvaladoc_la_VALASOURCES)
 		--library valadoc \
 		--vapi valadoc@PACKAGE_SUFFIX@.vapi \
 		--vapidir $(top_srcdir)/vapi --pkg gmodule-2.0 \
-		--vapidir $(top_srcdir)/vapi --pkg libgvc \
 		--vapidir $(top_srcdir)/gee --pkg gee \
 		--vapidir $(top_srcdir)/vala --pkg vala \
 		--vapidir $(top_srcdir)/ccode --pkg ccode \
 		--vapidir $(top_srcdir)/codegen --pkg codegen \
+		$(LIBGVC_PKG) \
 		--pkg config \
 		$(filter %.vala %.c,$^)
 	touch $@
@@ -206,6 +213,9 @@ nodist_pkgconfig_DATA = valadoc@PACKAGE_SUFFIX@.pc
 
 valadoc@PACKAGE_SUFFIX@.pc: valadoc.pc
 	cp $< $@
+if !ENABLE_GRAPHVIZ
+	sed -i "s/libgvc //g" $@
+endif
 
 vapidir = $(datadir)/vala/vapi
 dist_vapi_DATA = valadoc@PACKAGE_SUFFIX@.vapi
@@ -213,6 +223,9 @@ nodist_vapi_DATA = valadoc@PACKAGE_SUFFIX@.deps
 
 valadoc@PACKAGE_SUFFIX@.deps: valadoc.deps
 	cp $< $@
+if !ENABLE_GRAPHVIZ
+	sed -i "s/libgvc//g" $@
+endif
 
 EXTRA_DIST = \
 	$(libvaladoc_la_VALASOURCES) \

@@ -46,7 +46,11 @@ public abstract class Valadoc.Html.BasicDoclet : Api.Visitor, Doclet {
 	protected HtmlRenderer _renderer;
 	protected Html.MarkupWriter writer;
 	protected Html.CssClassResolver cssresolver;
+#if HAVE_GRAPHVIZ
 	protected Charts.Factory image_factory;
+#else
+	protected void* image_factory;
+#endif
 	protected ErrorReporter reporter;
 	protected string package_list_link = "../index.html";
 
@@ -120,7 +124,9 @@ public abstract class Valadoc.Html.BasicDoclet : Api.Visitor, Doclet {
 		this.linker = new LinkHelper ();
 
 		_renderer = new HtmlRenderer (settings, this.linker, this.cssresolver);
+#if HAVE_GRAPHVIZ
 		this.image_factory = new SimpleChartFactory (settings, linker);
+#endif
 	}
 
 
@@ -1028,6 +1034,7 @@ public abstract class Valadoc.Html.BasicDoclet : Api.Visitor, Doclet {
 	}
 
 	protected void write_image_block (Api.Node element) {
+#if HAVE_GRAPHVIZ
 		if (element is Class || element is Interface || element is Struct) {
 			unowned string format = (settings.use_svg_images ? "svg" : "png");
 			var chart = new Charts.Hierarchy (image_factory, element);
@@ -1047,6 +1054,7 @@ public abstract class Valadoc.Html.BasicDoclet : Api.Visitor, Doclet {
 									   this.get_img_path_html (element, format)});
 			writer.add_usemap (chart);
 		}
+#endif
 	}
 
 	public void write_namespace_content (Namespace node, Api.Node? parent) {

@@ -51,12 +51,16 @@ public class Valadoc.Html.MarkupWriter : Valadoc.MarkupWriter {
 		}
 	}
 
+#if HAVE_GRAPHVIZ
 	public unowned MarkupWriter add_usemap (Charts.Chart chart) {
 		string? buf = (string?) chart.write_buffer ("cmapx");
 		if (buf != null) {
 			raw_text ("\n");
 			raw_text ((!) buf);
 		}
+#else
+	public unowned MarkupWriter add_usemap (void* chart) {
+#endif
 
 		return this;
 	}

@@ -195,16 +195,16 @@ AC_SUBST(GMODULE_CFLAGS)
 AC_SUBST(GMODULE_LIBS)
 
 AC_ARG_WITH(cgraph, AS_HELP_STRING([--with-cgraph], [Required flag for cross-compilation to define capability of graphviz]), [], with_cgraph=check)
-AC_ARG_ENABLE(valadoc, AS_HELP_STRING([--disable-valadoc], [Disable valadoc]), enable_valadoc=$enableval, enable_valadoc=yes)
+AC_ARG_ENABLE(graphviz, AS_HELP_STRING([--disable-graphviz], [Disable graphviz usage for valadoc]), enable_graphviz=$enableval, enable_graphviz=yes)
 AS_IF([test "$VALAC" != :], [FOUND_VALAC_VERION=`$VALAC --version | sed 's/Vala  *//'`
 	AS_VERSION_COMPARE(["$FOUND_VALAC_VERION"], ["$VALAC_VALADOC_REQUIRED"], [
-		AC_MSG_WARN([Force disable build of valadoc, valac >= $VALAC_VALADOC_REQUIRED is required])
-		enable_valadoc=no
+		AC_MSG_ERROR([valac >= $VALAC_VALADOC_REQUIRED is required to build valadoc])
 	])
 ])
-if test x$enable_valadoc = xyes; then
+if test x$enable_graphviz = xyes; then
 	PKG_CHECK_MODULES(LIBGVC, libgvc >= $LIBGVC_REQUIRED)
 	AC_MSG_CHECKING([for CGRAPH])
+	VALAFLAGS="$VALAFLAGS -D HAVE_GRAPHVIZ"
 	cgraph_tmp_LIBADD="$LIBADD"
 	cgraph_tmp_CFLAGS="$CFLAGS"
 	LIBADD="$LIBADD $LIBGVC_LIBS"
@@ -242,8 +242,8 @@ if test x$enable_valadoc = xyes; then
 	LIBADD="$cgraph_tmp_LIBADD"
 	CFLAGS="$cgraph_tmp_CFLAGS"
 fi
+AM_CONDITIONAL(ENABLE_GRAPHVIZ, test x$enable_graphviz = xyes)
 AM_CONDITIONAL(HAVE_CGRAPH, test "$have_cgraph" = "yes")
-AM_CONDITIONAL(ENABLE_VALADOC, test x$enable_valadoc = xyes)
 
 AC_PATH_PROG([G_IR_COMPILER], [g-ir-compiler], :)
 AM_CONDITIONAL(HAVE_G_IR_COMPILER, test "$G_IR_COMPILER" != :)
